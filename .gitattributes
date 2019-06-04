@@ -1,3 +1,5 @@
+# do not to try automatic line feed, diff, and merge attempts for these types of files.
+
 *.mlx -crlf -diff -merge
 *.mat -crlf -diff -merge
 *.fig -crlf -diff -merge
@@ -15,3 +17,7 @@
 *.pdf -crlf -diff -merge
 *.jpg -crlf -diff -merge
 *.png -crlf -diff -merge
+
+# do not convert line endings on .sdf files, keep them as unix LF
+
+*.sdf text eol=lf
