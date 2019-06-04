@@ -5,6 +5,9 @@
 % The University of Alabama
 % Version: 1.0, created with MATLAB R2018a
 
+% N.B. this method is only useful when there are no missing data 
+% points in the records. For example, typically OK for CIDs, InChI, SMILES, and MW.
+
 %{
 Overall Description
 
@@ -44,29 +47,20 @@ for SDfile = SDfile_directory'
     % an indicated SDfile data header and field 
     % (e.g.,'> <PUBCHEM_COMPOUND_CID>') and the start of a new 
     % data header and field (e.g., '> <')
-  
-    % N.B. You can extract as many data values as necessary, 
-    % however be sure to extract the data in the order that the 
-    % data fields appear in the SDfile when reading the SDfile
-    % from top to bottom.
-    
+     
     % in this example, we will extract values associated with:
     
     % > <PUBCHEM_COMPOUND_CID>
-    % > <PUBCHEM_IUPAC_INCHIKEY>
-    % > <PUBCHEM_MOLECULAR_FORMULA>
+    % > <PUBCHEM_IUPAC_INCHI>
     % > <PUBCHEM_MOLECULAR_WEIGHT>
     % > <PUBCHEM_OPENEYE_CAN_SMILES>
     
     CID = extractBetween(SDfile_text, '> <PUBCHEM_COMPOUND_CID>', '> <');
     % delete any leading and trailing whitespace
     CID = strtrim(CID);
-    
-    IK = extractBetween(SDfile_text, '> <PUBCHEM_IUPAC_INCHIKEY>', '> <');
-    IK = strtrim(IK);
-    
-    MF = extractBetween(SDfile_text, '> <PUBCHEM_MOLECULAR_FORMULA>', '> <');
-    MF = strtrim(MF);
+       
+    InChI = extractBetween(SDfile_text, '> <PUBCHEM_IUPAC_INCHI>', '> <');
+    InChI = strtrim(InChI);
     
     MW = extractBetween(SDfile_text, '> <PUBCHEM_MOLECULAR_WEIGHT>', '> <');
     MW = strtrim(MW);
@@ -75,10 +69,9 @@ for SDfile = SDfile_directory'
     Can_SMI = strtrim(Can_SMI);
     
     % 3. Combine data into a table
-    SDfile_data = [Can_SMI CID IK MF MW];
+    SDfile_data = [Can_SMI CID InChI MW];
     SDfile_data = cell2table(SDfile_data, 'VariableNames', {'PUBCHEM_OPENEYE_CAN_SMILES',...
-        'PUBCHEM_COMPOUND_CID','PUBCHEM_IUPAC_INCHIKEY','PUBCHEM_MOLECULAR_FORMULA',...
-        'PUBCHEM_MOLECULAR_WEIGHT'});
+        'PUBCHEM_COMPOUND_CID','PUBCHEM_IUPAC_INCHI','PUBCHEM_MOLECULAR_WEIGHT'});
     
     % 4. Write new tab text files containing extracted data
     
