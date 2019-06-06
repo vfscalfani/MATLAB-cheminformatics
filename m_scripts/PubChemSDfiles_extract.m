@@ -71,7 +71,7 @@ for SDfile = SDfile_directory'
     % 3. Combine data into a table
     SDfile_data = [Can_SMI CID InChI MW];
     SDfile_data = cell2table(SDfile_data, 'VariableNames', {'PUBCHEM_OPENEYE_CAN_SMILES',...
-        'PUBCHEM_COMPOUND_CID','PUBCHEM_IUPAC_INCHI','PUBCHEM_MOLECULAR_WEIGHT'});
+        'PUBCHEM_COMPOUND_CID','PUBCHEM_IUPAC_INCHI','PUBCHEM_MOLECULAR_WEIGHT'})
     
     % 4. Write new tab text files containing extracted data
     
