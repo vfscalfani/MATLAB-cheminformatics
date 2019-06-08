@@ -6,14 +6,15 @@
 % Version: 1.0, created with MATLAB R2018a
 
 % N.B. this method is only useful when there are no missing data 
-% points in the records. For example, typically OK for CIDs, InChI, SMILES, and MW.
+% points in the SDfile records. For example, typically OK for CIDs,
+% InChI, SMILES, and MW.
 
 %{
 Overall Description
 
     1. Read PubChem Compound SDfiles into MATLAB Workspace as text
     2. Extract the PubChem data using the MATLAB extractBetween function
-    3. Combine data into a table
+    3. Combine extracted data into a table
     4. Write new tab text files containing extracted data
 %}
 %% Change directory to location of SDfiles
