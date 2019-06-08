@@ -5,9 +5,9 @@
 % Vincent F. Scalfani, Serena C. Ralph, Ali Al Alshaikh, and Jason E. Bara 
 % The University of Alabama
 % Version: 1.0, created with MATLAB R2018a
-% Reproducible Searching With PubChem
-% Use-case: Collect Literature References Associated with Simvastatin
-% PubChem patent and pubmed literature collections
+
+% N.B. PubChem SDQ query language is not officially supported from PubChem
+% Results/syntax may change
 
 % Define PubChem API
 api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/';
@@ -20,7 +20,6 @@ imshow(CID_img,map);
 %% Explore Total Literature Counts
 
 % Retrieve associated literature reference metadata
-% N.B. PubChem SDQ query language is not officially supported yet. 
 
 % Define PubChem SDQ with JSON output
 sdq = 'https://pubchem.ncbi.nlm.nih.gov/sdq/sdqagent.cgi?outfmt=json&query=';
@@ -131,7 +130,6 @@ end
 %% Retrieve Thieme Chemistry References
 
 % Retrieve all Thieme Chemistry References (only 2 from above lit count)
-% note only one result here anyway, but showing for demo purposes
 % (associated with CID 54454)
 litQthiemeF = [sdq '{"select":"*","collection":"thiemechemistry","where":{"ands":{"cid":"54454"}},' ...
     '"start":1,"limit":10}'];

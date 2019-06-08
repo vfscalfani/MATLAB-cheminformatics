@@ -17,6 +17,8 @@ api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/';
 
 SMARTSq = {'C1(C(N1~[CX3]([NX3])=[OX1])[CR0])[CR0]','C1(C(N1~[CX3](=O)[OX2H1])[CR0])[CR0]',...
     'C1(C(N1~[CX3](=[OX1])[F,Cl,Br,I])[CR0])[CR0]'}
+%% Perform a SMARTS query Search
+
 % generate URLs for SMARTS query searches
 for h = 1:length(SMARTSq)
     
@@ -46,6 +48,16 @@ end
 hit_CIDsALL = [hit_CIDs{1,1}.IdentifierList.CID; hit_CIDs{1,2}.IdentifierList.CID;...
     hit_CIDs{1,3}.IdentifierList.CID];
 hit_CIDsALL = num2cell(hit_CIDsALL)
+% set a CID limit to 100 max (can be higher, but useful for initial testing)
+number_hit_CIDsALL = length(hit_CIDsALL)
+if number_hit_CIDsALL > 100
+        
+        hit_CIDsALL = hit_CIDsALL(1:100)      
+else
+    disp('Number of CIDs not changed')    
+end
+%% Retrieve Identifier and Property Data
+
 % Create an identifier/property dataset from SMARTS Substructure Search results
 % Retrieve the following data from CID hit results:
 % InChI, Canonical SMILES, MW, HBond Donor Count, HBond Acceptor Count, XLogP
@@ -122,6 +134,8 @@ for r = 1:length(hit_CIDsALL)
                                        
 end
 
+%% Compile Data into a Table
+
 % convert cell array to string and remove leading and trailing white space
 hit_CIDsALLstring = strtrim(string(hit_CIDsALL));
 
@@ -138,6 +152,8 @@ save_folder = uigetdir;
 cd(save_folder)
 
 writetable(SMARTSq_table2,'MATLAB_SMARTSq_results.txt','Delimiter','tab')
+
+%% Retrieve Images of CID Compounds from SMARTS query match
 
 % loop through hit CIDs and show images
 for r = 1:length(hit_CIDsALL)

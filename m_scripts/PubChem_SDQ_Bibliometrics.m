@@ -6,6 +6,9 @@
 % The University of Alabama
 % Version: 1.0, created with MATLAB R2018a
 
+% N.B. PubChem SDQ query language is not officially supported from PubChem
+% Results/syntax may change
+
 % Define PubChem API
 api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/';
 sdq = 'https://pubchem.ncbi.nlm.nih.gov/sdq/sdqagent.cgi?outfmt=json&query=';

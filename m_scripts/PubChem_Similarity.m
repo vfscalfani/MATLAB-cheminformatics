@@ -17,6 +17,7 @@ CID_url = [api 'cid/' CID_SS_query '/PNG'];
 imshow(CID_img,map)
 % set MATLAB web options to a 30 second timeout
 options = weboptions('Timeout', 30);
+%% Retrieve InChI and SMILES
 
 % Retrieve InChI
 inchi_url = [api 'cid/' CID_SS_query '/property/inchi/TXT'];
@@ -26,12 +27,24 @@ disp(inchi)
 IS_url = [api 'cid/' CID_SS_query '/property/IsomericSMILES/TXT'];
 IS = webread(IS_url, options);
 disp(IS)
+%% Perform a Similarity Search
+
 % Search for chemical structures by Similarity Search (SS), 
 % (2D Tanimoto threshold 95% to Hepoxilin A4; CID = 6438949)
 api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/';
 SS_url = [api 'fastsimilarity_2d/cid/' CID_SS_query '/cids/JSON?Threshold=95'];
 SS_CIDs = webread(SS_url,options);
 SS_CIDs = num2cell(SS_CIDs.IdentifierList.CID)
+% set a CID limit to 100 max (can be higher, but useful for initial testing)
+number_SS_CIDs = length(SS_CIDs)
+if number_SS_CIDs > 100
+        
+        SS_CIDs = SS_CIDs(1:100)      
+else
+    disp('Number of SS_CIDs not changed')    
+end
+%% Retrieve Identifier and Property Data
+
 % Create an identifier/property dataset from Similarity Search results
 % Retrieve the following data from CID hit results:
 % InChI, Isomeric SMILES, MW, HBond Donor Count, HBond Acceptor Count, XLogP
@@ -108,6 +121,8 @@ for r = 1:length(SS_CIDs)
                                        
 end
 
+%% Compile Data into a Table
+
 % convert cell array to string and remove leading and trailing white space
 SS_CIDs_string = strtrim(string(SS_CIDs));
 
@@ -124,6 +139,7 @@ save_folder = uigetdir;
 cd(save_folder)
 
 writetable(SSq_table2,'MATLAB_Similarityq_results.txt','Delimiter','tab')
+%% Retrieve Images of CID Compounds from Similarity Search
 
 % loop through hit CIDs and show images
 for r = 1:length(SS_CIDs)
