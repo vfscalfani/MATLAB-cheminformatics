@@ -6,8 +6,8 @@
 % The University of Alabama
 % Version: 1.0, created with MATLAB R2018a
 
-% N.B. PubChem SDQ query language is not officially supported from PubChem
-% Results/syntax may change
+% N.B. PubChem SDQ is used internally by PubChem webpages and is still 
+% being rapidly developed.
 
 % Define PubChem API
 api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/';
@@ -48,21 +48,22 @@ fprintf(['litCountQ_pubmed = %d \nlitCountQ_patent = %d \nlitCountQ_springernatu
 litQpubmed1_url = [sdq '{"select":"*","collection":"pubmed","where":{"ands":{"cid":"54454"}},' ...
     '"start":1,"limit":1}'];
 litQpubmed1 = webread(litQpubmed1_url, options);
-
+disp(litQpubmed1.SDQOutputSet.rows)
 % patent
 litQpatent1_url = [sdq '{"select":"*","collection":"patent","where":{"ands":{"cid":"54454"}},' ...
     '"start":1,"limit":1}'];
 litQpatent1 = webread(litQpatent1_url, options);
-
+disp(litQpatent1.SDQOutputSet.rows)
 % springernature
 litQspringernature1_url = [sdq '{"select":"*","collection":"springernature","where":{"ands":{"cid":"54454"}},' ...
     '"start":1,"limit":1}'];
 litQspringernature1 = webread(litQspringernature1_url, options);
-
-% thieme
+disp(litQspringernature1.SDQOutputSet.rows)
+% thieme chemistry
 litQthieme1_url = [sdq '{"select":"*","collection":"thiemechemistry","where":{"ands":{"cid":"54454"}},' ...
     '"start":1,"limit":1}'];
 litQthieme1 = webread(litQthieme1_url, options);
+disp(litQthieme1.SDQOutputSet.rows)
 %% Search PubMed Collection
 %%
 % Search pubchem pubmed collection for 
