@@ -13,8 +13,7 @@ Count references and data in PubChem associated with a CID
 
 Search PubChem for PubMed, Patent, Springer Nature, and Thieme Literature associated with a CID
 
-3. PubChem_Similarity
-
+3. [PubChem_Similarity](https://vfscalfani.github.io/MATLAB-cheminformatics/live_scripts_html/PubChem_Similarity.html):
 Search for chemical structures in PubChem via a Fingerprint Tanimoto Similarity Search
 
 4. PubChem_SMARTS
