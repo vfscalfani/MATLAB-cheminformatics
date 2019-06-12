@@ -17,5 +17,5 @@ Search for chemical structures in PubChem via a Fingerprint Tanimoto Similarity 
 4. [PubChem_SMARTS](https://vfscalfani.github.io/MATLAB-cheminformatics/live_scripts_html/PubChem_SMARTS.html):
 Search for chemical structures in PubChem via a SMARTS substructure query and compile results
 
-5. [PubChemSDfiles_extract](https://vfscalfani.github.io/MATLAB-cheminformatics/live_scripts_html/PubChem_SDfiles_extract.html):
+5. [PubChemSDfiles_extract](https://vfscalfani.github.io/MATLAB-cheminformatics/live_scripts_html/PubChemSDfiles_extract.html):
 Extract data from PubChem SDfiles using a text-based approach
