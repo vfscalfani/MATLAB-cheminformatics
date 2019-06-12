@@ -6,17 +6,22 @@
 % The University of Alabama
 % Version: 1.0, created with MATLAB R2018a
 
-% Define PubChem API
+%% Define the PubChem API base URL
+
+% PubChem API
 api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/';
 
-% Define SMARTS queries
-% 1. C1(C(N1~[CX3]([NX3])=[OX1])[CR0])[CR0]; aziridine with amide
-% 2. C1(C(N1~[CX3](=O)[OX2H1])[CR0])[CR0]; aziridine with carboxylic acid
-% 3. C1(C(N1~[CX3](=[OX1])[F,Cl,Br,I])[CR0])[CR0]; aziridine with acyl halide
+% set MATLAB web options to a 30 second timeout
+options = weboptions('Timeout', 30);
+%% Define SMARTS queries
+
 % view pattern syntax at: https://smartsview.zbh.uni-hamburg.de/
 
 SMARTSq = {'C1(C(N1~[CX3]([NX3])=[OX1])[CR0])[CR0]','C1(C(N1~[CX3](=O)[OX2H1])[CR0])[CR0]',...
     'C1(C(N1~[CX3](=[OX1])[F,Cl,Br,I])[CR0])[CR0]'}
+%% 
+% _Add your own SMARTS queries to customize. You can add as many as desired 
+% within a cell array._
 %% Perform a SMARTS query Search
 
 % generate URLs for SMARTS query searches
@@ -25,10 +30,7 @@ for h = 1:length(SMARTSq)
     SMARTSq_url{h} = [api 'fastsubstructure/smarts/' char(SMARTSq(h)) '/cids/JSON'];
 end
 
-% set MATLAB web options to a 30 second timeout
-options = weboptions('Timeout', 30);
-
-% perform substructure searches for each query link in SMARTSq_url (3 total)
+% perform substructure searches for each query link in SMARTSq_url
 for i = 1:length(SMARTSq_url)
     
     try
@@ -45,10 +47,15 @@ for i = 1:length(SMARTSq_url)
 end
 
 % Transfer JSON data to a cell array with all CIDs
+% may need to adjust concatenation below depending on # of SMARTS
 hit_CIDsALL = [hit_CIDs{1,1}.IdentifierList.CID; hit_CIDs{1,2}.IdentifierList.CID;...
     hit_CIDs{1,3}.IdentifierList.CID];
 hit_CIDsALL = num2cell(hit_CIDsALL)
-% set a CID limit to 100 max (can be higher, but useful for initial testing)
+% set a CID limit to 100 max
+%% 
+% _The CID limit of 100 was added as an initial testing safety for time 
+% consideration. This limit can be increased._
+
 number_hit_CIDsALL = length(hit_CIDsALL)
 if number_hit_CIDsALL > 100
         
@@ -62,6 +69,7 @@ end
 % Retrieve the following data from CID hit results:
 % InChI, Canonical SMILES, MW, HBond Donor Count, HBond Acceptor Count, XLogP
 
+% setup a for loop that processes each CID one-by-one
 for r = 1:length(hit_CIDsALL)
     CID = hit_CIDsALL{r};
     
@@ -74,6 +82,14 @@ for r = 1:length(hit_CIDsALL)
     CID_HBond_A_url = [api 'cid/' num2str(CID) '/property/HBondAcceptorCount/TXT'];
     CID_XLogP_url = [api 'cid/' num2str(CID) '/property/XLogP/TXT'];
         
+%% 
+% _Additional property data can be collected by defining new api calls, 
+% for example, if you want TPSA data:_
+
+% CID_TPSA_url = [api 'cid/' num2str(CID) '/property/TPSA/TXT'];
+%% 
+% ||
+
     % retrieve identifer and property data
     try
         CID_InChI = webread(CID_InChI_url,options);      
@@ -124,13 +140,23 @@ for r = 1:length(hit_CIDsALL)
         n = 0.5;
         pause(n)
         
-      % add property data to hit_CIDsALL data array 
+      % add property data to hit_CIDsALL data array
+      
+      % column numbers indicate where the data will be stored.
+      % For example, the MW will be placed in column 4. r increases
+      % by 1 on each iteration, so the first CID_MW value gets stored in
+      % {1,4}, the second in {2,4}, the third in {3,4}, etc.
+      
         hit_CIDsALL{r,2} = CID_InChI;
         hit_CIDsALL{r,3} = CID_CanSMI;
         hit_CIDsALL{r,4} = CID_MW;
         hit_CIDsALL{r,5} = CID_HBond_D;
         hit_CIDsALL{r,6} = CID_HBond_A;
         hit_CIDsALL{r,7} = CID_XLogP;
+        
+        
+       % to add more data, simply index into the next column
+       % hit_CIDsALL{r,8} = CID_TPSA;
                                        
 end
 
