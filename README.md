@@ -1,8 +1,8 @@
 # MATLAB-cheminformatics
 A collection of MATLAB live scripts useful for compiling chemical data
 and literature. MATLAB live scripts (`*.mlx`) are in the `/live_scripts` folder.
-An equivalent plain text version is also included (`.m`). The MATLAB live
-scripts can be previewed as HTML formatted documents via the hyper links below:
+An equivalent plain text version is also included (`.m`) in the `/m_scripts` folder.
+The MATLAB live scripts can be previewed as HTML formatted documents via the links below:
 
 1. [PubChem_SDQ_Bibliometrics](https://vfscalfani.github.io/MATLAB-cheminformatics/live_scripts_html/PubChem_SDQ_Bibliometrics.html):
 Count references and data in PubChem associated with a CID (e.g., from PubMed, Patent, Springer Nature,
