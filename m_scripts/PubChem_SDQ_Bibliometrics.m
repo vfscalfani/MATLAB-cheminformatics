@@ -18,7 +18,7 @@ sdq = 'https://pubchem.ncbi.nlm.nih.gov/sdq/sdqagent.cgi?outfmt=json&query=';
 % set a longer web options timeout
 % this prevents a MATLAB timeout if the server is slow to respond.
 options_api = weboptions('Timeout', 30);
-options_sdq = weboptions('Timeout', 60, 'ContentType','json');
+options_sdq = weboptions('Timeout', 60,'ContentType','json');
 
 % Retrieve and display a PNG Image of Compound K-252a; CID = 3035817
 CID_SS_query = '3035817';
