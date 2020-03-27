@@ -2,10 +2,9 @@
 % Search for chemical structures in PubChem via a SMARTS substructure query 
 % and compile results
 
-% Vincent F. Scalfani, Serena C. Ralph, and Jason E. Bara 
+% Vincent F. Scalfani, Serena C. Ralph, and Jason E. Bara
 % The University of Alabama
-% Version: 1.0, created with MATLAB R2018a
-
+% Tested with MATLAB R2020a, running Ubuntu 18.04 on March 27, 2020.
 %% Define the PubChem API base URL
 
 % PubChem API
@@ -16,9 +15,11 @@ options = weboptions('Timeout', 30);
 %% Define SMARTS queries
 
 % view pattern syntax at: https://smartsview.zbh.uni-hamburg.de/
+% these are vinyl imidazolium substructure searches
 
-SMARTSq = {'C1(C(N1~[CX3]([NX3])=[OX1])[CR0])[CR0]','C1(C(N1~[CX3](=O)[OX2H1])[CR0])[CR0]',...
-    'C1(C(N1~[CX3](=[OX1])[F,Cl,Br,I])[CR0])[CR0]'}
+SMARTSq = {'[CR0H2][n+]1[cH1][cH1]n([CR0H1]=[CR0H2])[cH1]1',...
+    '[CR0H2][n+]1[cH1][cH1]n([CR0H2][CR0H1]=[CR0H2])[cH1]1',...
+    '[CR0H2][n+]1[cH1][cH1]n([CR0H2][CR0H2][CR0H1]=[CR0H2])[cH1]1'}
 %% 
 % _Add your own SMARTS queries to customize. You can add as many as desired 
 % within a cell array._
@@ -26,7 +27,6 @@ SMARTSq = {'C1(C(N1~[CX3]([NX3])=[OX1])[CR0])[CR0]','C1(C(N1~[CX3](=O)[OX2H1])[C
 
 % generate URLs for SMARTS query searches
 for h = 1:length(SMARTSq)
-    
     SMARTSq_url{h} = [api 'fastsubstructure/smarts/' char(SMARTSq(h)) '/cids/JSON'];
 end
 
@@ -47,27 +47,26 @@ for i = 1:length(SMARTSq_url)
 end
 
 % Transfer JSON data to a cell array with all CIDs
-% may need to adjust concatenation below depending on # of SMARTS
+% may need to adjust concatenation below depending on # of SMARTS queries
 hit_CIDsALL = [hit_CIDs{1,1}.IdentifierList.CID; hit_CIDs{1,2}.IdentifierList.CID;...
     hit_CIDs{1,3}.IdentifierList.CID];
 hit_CIDsALL = num2cell(hit_CIDsALL)
-% set a CID limit to 100 max
+% set a CID limit to 25 max
 %% 
-% _The CID limit of 100 was added as an initial testing safety for time 
-% consideration. This limit can be increased._
+% _The CID limit of 25 was added as an initial testing safety for time consideration. 
+% This limit can be increased._
 
 number_hit_CIDsALL = length(hit_CIDsALL)
-if number_hit_CIDsALL > 100
-        
-        hit_CIDsALL = hit_CIDsALL(1:100)      
+if number_hit_CIDsALL > 25
+    hit_CIDsALL = hit_CIDsALL(1:25)    
 else
     disp('Number of CIDs not changed')    
 end
 %% Retrieve Identifier and Property Data
 
-% Create an identifier/property dataset from SMARTS Substructure Search results
-% Retrieve the following data from CID hit results:
-% InChI, Canonical SMILES, MW, HBond Donor Count, HBond Acceptor Count, XLogP
+% Create an identifier/property dataset from the SMARTS substructure search results
+% Retrieve the following data for each CID:
+% InChI, Canonical SMILES, MW, IUPAC Name, Heavy Atom Count, Covalent Unit Count, Charge
 
 % setup a for loop that processes each CID one-by-one
 for r = 1:length(hit_CIDsALL)
@@ -78,17 +77,18 @@ for r = 1:length(hit_CIDsALL)
     CID_InChI_url = [api 'cid/' num2str(CID) '/property/InChI/TXT'];
     CID_CanSMI_url = [api 'cid/' num2str(CID) '/property/CanonicalSMILES/TXT'];
     CID_MW_url = [api 'cid/' num2str(CID) '/property/MolecularWeight/TXT'];  
-    CID_HBond_D_url = [api 'cid/' num2str(CID) '/property/HBondDonorCount/TXT'];
-    CID_HBond_A_url = [api 'cid/' num2str(CID) '/property/HBondAcceptorCount/TXT'];
-    CID_XLogP_url = [api 'cid/' num2str(CID) '/property/XLogP/TXT'];
+    CID_IUPACName_url = [api 'cid/' num2str(CID) '/property/IUPACName/TXT'];
+    CID_HeavyAtomCount_url = [api 'cid/' num2str(CID) '/property/HeavyAtomCount/TXT'];
+    CID_CovalentUnitCount_url = [api 'cid/' num2str(CID) '/property/CovalentUnitCount/TXT'];
+    CID_Charge_url = [api 'cid/' num2str(CID) '/property/Charge/TXT'];
         
 %% 
-% _Additional property data can be collected by defining new api calls, 
-% for example, if you want TPSA data:_
+% _Additional property data can be collected by defining new api calls, for 
+% example, if you want TPSA data:_
 
 % CID_TPSA_url = [api 'cid/' num2str(CID) '/property/TPSA/TXT'];
 %% 
-% ||
+% 
 
     % retrieve identifer and property data
     try
@@ -117,31 +117,38 @@ for r = 1:length(hit_CIDsALL)
         pause(n)
             
     try
-        CID_HBond_D = webread(CID_HBond_D_url,options);
+        CID_IUPACName = webread(CID_IUPACName_url,options);
     catch ME
-        CID_HBond_D = 'not found'
+        CID_IUPACName = 'not found'
     end
         n = 0.5;
         pause(n)
         
     try
-        CID_HBond_A = webread(CID_HBond_A_url,options);
+        CID_HeavyAtomCount = webread(CID_HeavyAtomCount_url,options);
     catch ME
-        CID_HBond_A = 'not found'
+        CID_HeavyAtomCount = 'not found'
     end
         n = 0.5;
         pause(n)
-       
+        
     try
-        CID_XLogP = webread(CID_XLogP_url,options);
+        CID_CovalentUnitCount = webread(CID_CovalentUnitCount_url,options);
     catch ME
-        CID_XLogP = 'not found'
+        CID_CovalentUnitCount = 'not found'
     end
         n = 0.5;
         pause(n)
+        
+    try
+        CID_Charge = webread(CID_Charge_url,options);
+    catch ME
+        CID_Charge = 'not found'
+    end
+        n = 0.5;
+        pause(n)  
         
       % add property data to hit_CIDsALL data array
-      
       % column numbers indicate where the data will be stored.
       % For example, the MW will be placed in column 4. r increases
       % by 1 on each iteration, so the first CID_MW value gets stored in
@@ -150,13 +157,13 @@ for r = 1:length(hit_CIDsALL)
         hit_CIDsALL{r,2} = CID_InChI;
         hit_CIDsALL{r,3} = CID_CanSMI;
         hit_CIDsALL{r,4} = CID_MW;
-        hit_CIDsALL{r,5} = CID_HBond_D;
-        hit_CIDsALL{r,6} = CID_HBond_A;
-        hit_CIDsALL{r,7} = CID_XLogP;
-        
+        hit_CIDsALL{r,5} = CID_IUPACName;
+        hit_CIDsALL{r,6} = CID_HeavyAtomCount;
+        hit_CIDsALL{r,7} = CID_CovalentUnitCount;
+        hit_CIDsALL{r,8} = CID_Charge;        
         
        % to add more data, simply index into the next column
-       % hit_CIDsALL{r,8} = CID_TPSA;
+       % hit_CIDsALL{r,9} = CID_TPSA;
                                        
 end
 
@@ -167,21 +174,21 @@ hit_CIDsALLstring = strtrim(string(hit_CIDsALL));
 
 % convert to table
 SMARTSq_table = array2table(hit_CIDsALLstring, 'VariableNames',{'CID', 'InChI','CanSMI','MW',...
-    'HBond_D','HBond_A','XLogP'})
-% rearrange table so that Canonical SMILES are in column 1
-SMARTSq_table2 = SMARTSq_table(:, {'CanSMI' 'CID' 'InChI' 'MW' 'HBond_D' 'HBond_A' 'XLogP'})
+    'IUPACName','HeavyAtomCount','CovalentUnitCount', 'Charge'})
+% rearrange table
+SMARTSq_table2 = SMARTSq_table(:, {'CanSMI' 'IUPACName' 'CID' 'InChI' 'MW',...
+     'HeavyAtomCount' 'CovalentUnitCount' 'Charge'})
 % data export as tabbed text file
 % prompt user to select folder for data export
 save_folder = uigetdir;
 
 % change directory to selected folder
 cd(save_folder)
-
 writetable(SMARTSq_table2,'MATLAB_SMARTSq_results.txt','Delimiter','tab')
 
 %% Retrieve Images of CID Compounds from SMARTS query match
 
-% loop through hit CIDs and show images
+% loop through CIDs and show images
 for r = 1:length(hit_CIDsALL)
     CID = hit_CIDsALL{r};
     api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/';
