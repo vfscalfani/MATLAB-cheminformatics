@@ -1,14 +1,11 @@
 %% PubChem_SDQ_LitSearch
-% Search PubChem for PubMed, Patent, Springer Nature, and Thieme Literature 
+% Search PubChem for PubMed, Patent, Springer Nature, Thieme, and Wiley Literature 
 % associated with a CID
 
 % Vincent F. Scalfani, Serena C. Ralph, Ali Al Alshaikh, and Jason E. Bara 
 % The University of Alabama
-% Version: 1.0, created with MATLAB R2018a
-
-% N.B. PubChem SDQ is used internally by PubChem webpages and is still 
-% being rapidly developed.
-
+% Tested with MATLAB R2020a, running Ubuntu 18.04 on March 30, 2020.
+% N.B. PubChem SDQ is used internally by PubChem webpages and is still being rapidly developed.
 %% Define the PubChem API and SDQ agent base URL
 
 % PubChem API
@@ -20,8 +17,9 @@ sdq = 'https://pubchem.ncbi.nlm.nih.gov/sdq/sdqagent.cgi?outfmt=json&query=';
 % set a longer web options timeout and json output
 options = weboptions('Timeout', 60, 'ContentType','json');
 
-% Retrieve and display PNG Image of Simvastatin; CID = 54454
-CID_query = '54454';
+% Retrieve and display PNG Image of 1-Butyl-3-methylimidazolium chloride;
+% CID 2734161
+CID_query = '2734161';
 CID_query_url = [api CID_query '/PNG'];
 [CID_img,map] = imread(CID_query_url);
 imshow(CID_img,map);
@@ -34,30 +32,33 @@ litCountQ_url = [sdq '{"hide":"*","collection":"*","where":{"ands":{"cid":"' CID
 litCountQ = webread(litCountQ_url, options);
 
 % display all available collections
-litCountQ_coll = extractfield(litCountQ.SDQOutputSet,'collection')';
-cell2table(litCountQ_coll)
+collections = cell(1,length(litCountQ.SDQOutputSet)); % preallocate
+for k = 1:length(litCountQ.SDQOutputSet)
+    collections{k} = litCountQ.SDQOutputSet{k, 1}.collection;
+end
+collections = collections'
 % Display total literature counts of selected collections:
-% pubmed, patent, springer nature, and thiemechemistry
+% pubmed, patent, springernature, thiemechemistry, and wiley
 
-litCountQ_pubmed = litCountQ.SDQOutputSet(6).totalCount;
-litCountQ_patent = litCountQ.SDQOutputSet(4).totalCount;
-litCountQ_springernature = litCountQ.SDQOutputSet(13).totalCount;
-litCountQ_thieme = litCountQ.SDQOutputSet(12).totalCount;
+litCountQ_pubmed = litCountQ.SDQOutputSet{7,1}.totalCount;
+litCountQ_patent = litCountQ.SDQOutputSet{4,1}.totalCount;
+litCountQ_springernature = litCountQ.SDQOutputSet{15,1}.totalCount;
+litCountQ_thieme = litCountQ.SDQOutputSet{13,1}.totalCount;
+litCountQ_wiley = litCountQ.SDQOutputSet{14,1}.totalCount;
 
 fprintf(['litCountQ_pubmed = %d \nlitCountQ_patent = %d \nlitCountQ_springernature = %d' ...
-    '\nlitCountQ_thieme = %d\n'] ,...
-    litCountQ_pubmed, litCountQ_patent, litCountQ_springernature, litCountQ_thieme)
-
+    '\nlitCountQ_thieme = %d \nlitCountQ_wiley = %d'] ,...
+    litCountQ_pubmed, litCountQ_patent, litCountQ_springernature, litCountQ_thieme, litCountQ_wiley)
 %% 
 % _If interested in different collections:_
-% 
+%% 
 % # _Determine the collection you are interested in (e.g., 'clinicaltrials') 
 % from the litCountQ.SDQOutputSet structure_
-% # _Then, record the row number the collection appears in (16 for 'clinicaltrials')_
-% # _Next, use this number to index into the litCountQ.SDQOutputSet _
-% # _For example, litCountQ.SDQOutputSet(16).totalCount_
-%% Explore Structure of the Literature Data
-%%
+% # _Then, record the row number the collection appears in (18 for 'clinicaltrials')_
+% # _Next, use this number to index into the litCountQ.SDQOutputSet_ 
+% # _For example, litCountQ.SDQOutputSet{18,1}.totalCount_
+%% Explore Categories of the Literature Data
+
 % Retrieve 1 associated literature reference from each selected collection to look at 
 % JSON field data
 
@@ -81,20 +82,24 @@ litQthieme1_url = [sdq '{"select":"*","collection":"thiemechemistry","where":{"a
     '"start":1,"limit":1}'];
 litQthieme1 = webread(litQthieme1_url, options);
 disp(litQthieme1.SDQOutputSet.rows)
+% wiley
+litQpwiley1_url = [sdq '{"select":"*","collection":"wiley","where":{"ands":{"cid":"' CID_query '"}},' ...
+    '"start":1,"limit":1}'];
+litQwiley1 = webread(litQpwiley1_url, options);
+disp(litQwiley1.SDQOutputSet.rows)
 %% 
-% _Note that in each collection there are multiple unique searchable fields 
-% that we can use to perform literature searching._
-% 
-% _Some examples are presented below for how to combine the fields with keywords. 
-% The limit was set at 10 for demo purposes._
+% _In each collection there are multiple unique searchable fields that we can 
+% use to perform literature searching. Some examples are presented below for how 
+% to combine the fields with keywords. Please note that this is still an experimental 
+% method. The limit was set at 10 for demo purposes._
 %% Search PubMed Collection
-%%
+
 % Search pubchem pubmed collection for 
-% referencess containing meshheadings "simvastatin" and meshsubheadings "chemical synthesis"
+% referencess containing meshheadings "Imidazoles" and meshsubheadings "chemical synthesis"
 % (associated with CID_query)
 
 litQpubmedF = [sdq '{"select":"*","collection":"pubmed","where":{"ands":{"cid":"' CID_query '",' ...
-    '"meshheadings":"simvastatin", "meshsubheadings":"chemical synthesis"}},"start":1,"limit":10}'];
+    '"meshheadings":"Imidazoles", "meshsubheadings":"chemical synthesis"}},"start":1,"limit":10}'];
 options = weboptions('Timeout', 60, 'ContentType','json');
 litQpubmedF = webread(litQpubmedF, options);
 
@@ -113,11 +118,11 @@ for k = 1:length(litQpubmedF.SDQOutputSet.rows)
     disp(' ')
 end
 %% Search Patent Collection
-%%
-% Search pubchem patent collection for patents with "simvastatin" and "preparation" in the title
+
+% Search pubchem patent collection for patents with "imidazolium" in the abstract and "preparation" in the title
 % (associated with CID_query)
 litQpatentF = [sdq '{"select":"*","collection":"patent","where":{"ands":{"cid":"' CID_query '",' ...
-    '"patenttitle":"simvastatin", "patenttitle":"preparation"}},"start":1,"limit":10}'];
+    '"patentabstract":"imidazolium", "patenttitle":"preparation"}},"start":1,"limit":10}'];
 options = weboptions('Timeout', 60, 'ContentType','json');
 litQpatentF = webread(litQpatentF, options);
 
@@ -132,11 +137,11 @@ for k = 1:length(litQpatentF.SDQOutputSet.rows)
     disp(' ')
 end
 %% Search Springer Nature
-%%
-% Search springer nature collection for "simvastatin" in the title and publication year 2019
+
+% Search springer nature collection for "imidazolium" in the title and publication year 2019
 % (associated with CID_query)
 litQspringernatureF = [sdq '{"select":"*","collection":"springernature","where":{"ands":{"cid":"' CID_query '",' ...
-    '"articletitle":"simvastatin", "articlepubdate":"2019"}},"start":1,"limit":10}'];
+    '"articletitle":"imidazolium", "articlepubdate":"2019"}},"start":1,"limit":10}'];
 options = weboptions('Timeout', 60, 'ContentType','json');
 litQspringernatureF = webread(litQspringernatureF, options);
 
@@ -150,10 +155,13 @@ for k = 1:length(litQspringernatureF.SDQOutputSet.rows)
     fprintf('<a href = " %s ">%s</a>', articleurl, articleurl)
     disp(' ')
 end
-%% Retrieve Thieme Chemistry References
+%% Retrieve Thieme and Wiley Chemistry References
 
-% Retrieve all Thieme Chemistry References (only 2 from above lit count)
+% Retrieve all Thieme and Wiley Chemistry References associated with our
+% CID query (since both are < 10 results)
 % (associated with CID_query)
+
+% Thieme
 litQthiemeF = [sdq '{"select":"*","collection":"thiemechemistry","where":{"ands":{"cid":"' CID_query '"}},' ...
     '"start":1,"limit":10}'];
 
@@ -162,11 +170,28 @@ litQthiemeF = webread(litQthiemeF, options);
 
 % Display results
 for k = 1:length(litQthiemeF.SDQOutputSet.rows)
-    extID = litQthiemeF.SDQOutputSet.rows{k,1}.extid
-    articletitle = litQthiemeF.SDQOutputSet.rows{k,1}.articletitle
-    articlejournalname = litQthiemeF.SDQOutputSet.rows{k,1}.articlejourname
-    articlepubdate = litQthiemeF.SDQOutputSet.rows{k,1}.articlepubdate
-    articleurl = litQthiemeF.SDQOutputSet.rows{k,1}.url;
+    extID = litQthiemeF.SDQOutputSet.rows(k).extid
+    articletitle = litQthiemeF.SDQOutputSet.rows(k).articletitle
+    articlejournalname = litQthiemeF.SDQOutputSet.rows(k).articlejourname
+    articlepubdate = litQthiemeF.SDQOutputSet.rows(k).articlepubdate
+    articleurl = litQthiemeF.SDQOutputSet.rows(k).url;
+    fprintf('<a href = " %s ">%s</a>', articleurl, articleurl)
+    disp(' ')
+end
+% Wiley
+litQwileyF = [sdq '{"select":"*","collection":"wiley","where":{"ands":{"cid":"' CID_query '"}},' ...
+    '"start":1,"limit":10}'];
+
+options = weboptions('Timeout', 60, 'ContentType','json');
+litQwileyF = webread(litQwileyF, options);
+
+% Display results
+for k = 1:length(litQwileyF.SDQOutputSet.rows)
+    extID = litQwileyF.SDQOutputSet.rows(k).extid
+    articletitle = litQwileyF.SDQOutputSet.rows(k).articletitle
+    articlejournalname = litQwileyF.SDQOutputSet.rows(k).articlejourname
+    articlepubdate = litQwileyF.SDQOutputSet.rows(k).articlepubdate
+    articleurl = litQwileyF.SDQOutputSet.rows(k).url;
     fprintf('<a href = " %s ">%s</a>', articleurl, articleurl)
     disp(' ')
 end
