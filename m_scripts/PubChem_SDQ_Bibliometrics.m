@@ -4,7 +4,7 @@
 
 % Vincent F. Scalfani, Serena C. Ralph, Ali Al Alshaikh, and Jason E. Bara
 % The University of Alabama
-% Tested with MATLAB R2020a, running Ubuntu 18.04 on March 26, 2020.
+% Tested with MATLAB R2020a, running Ubuntu 18.04 on March 30, 2020.
 % PubChem SDQ is used internally by PubChem webpages and is still being rapidly developed.
 %% Define the PubChem API and SDQ agent base URL
 
@@ -18,8 +18,8 @@ sdq = 'https://pubchem.ncbi.nlm.nih.gov/sdq/sdqagent.cgi?outfmt=json&query=';
 options_api = weboptions('Timeout', 30);
 options_sdq = weboptions('Timeout', 60,'ContentType','json');
 
-% Retrieve and display a PNG image of Quinine; CID = 3034034
-CID_SS_query = '3034034';
+% Retrieve and display a PNG image of 1-Butyl-3-methyl-imidazolium; CID 2734162
+CID_SS_query = '2734162';
 %% 
 % _Replace the above CID value (CID_SS_query) with a different CID number to 
 % customize._
@@ -29,15 +29,15 @@ CID_url = [api 'cid/' CID_SS_query '/PNG'];
 imshow(CID_img,map)
 %% Perform a Similarity Search
 
-% Search for chemical structures by Similarity Search (SS), 
-% (2D Tanimoto threshold 97% to Quinine; CID = 3034034)
+% Search for chemical structures by Similarity Search (SS),
+% (2D Tanimoto threshold 95% to 1-Butyl-3-methyl-imidazolium; CID 2734162)
 api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/';
-SS_url = [api 'fastsimilarity_2d/cid/' CID_SS_query '/cids/JSON?Threshold=97'];
+SS_url = [api 'fastsimilarity_2d/cid/' CID_SS_query '/cids/JSON?Threshold=95'];
 SS_CIDs = webread(SS_url,options_api);
 SS_CIDs = num2cell(SS_CIDs.IdentifierList.CID)
 %% 
 % _In the above SS_url value, you can adjust to the desired Tanimoto threshold 
-% (i.e., 95, 90, etc.)_
+% (e.g., 90)_
 
 % set a CID limit to 25 max
 number_SS_CIDs = length(SS_CIDs)
@@ -129,7 +129,7 @@ end
 % display all available collections
 collections = cell(1,length(litCountQ.SDQOutputSet)); % preallocate
 for k = 1:length(litCountQ.SDQOutputSet)
-    collections{k} = litCountQ.SDQOutputSet{k, 1}.collection;
+    collections{k} = litCountQ.SDQOutputSet{k,1}.collection;
 end
 collections = collections'
 %% 
