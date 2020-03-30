@@ -4,7 +4,7 @@
 
 % Vincent F. Scalfani, Serena C. Ralph, and Jason E. Bara 
 % The University of Alabama
-% Version: 1.0, created with MATLAB R2018a
+% Tested with MATLAB R2020a, running Ubuntu 18.04 on March 30, 2020.
 %% Define the PubChem API base URL
 
 % PubChem API
@@ -13,8 +13,8 @@ api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/';
 % set MATLAB web options to a 30 second timeout
 options = weboptions('Timeout', 30);
 
-% Retrieve and display PNG Image of Hepoxilin A4; CID = 6438949
-CID_SS_query = '6438949';
+% Retrieve and display PNG Image of 1-Butyl-3-methyl-imidazolium; CID = 2734162
+CID_SS_query = '2734162';
 
 CID_url = [api 'cid/' CID_SS_query '/PNG'];
 [CID_img,map] = imread(CID_url);
@@ -34,7 +34,7 @@ disp(IS)
 %% Perform a Similarity Search
 
 % Search for chemical structures by Similarity Search (SS), 
-% (2D Tanimoto threshold 95% to Hepoxilin A4; CID = 6438949)
+% (2D Tanimoto threshold 95% to 1-Butyl-3-methyl-imidazolium; CID = 2734162)
 api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/';
 SS_url = [api 'fastsimilarity_2d/cid/' CID_SS_query '/cids/JSON?Threshold=95'];
 SS_CIDs = webread(SS_url,options);
@@ -43,15 +43,14 @@ SS_CIDs = num2cell(SS_CIDs.IdentifierList.CID)
 % _In the above SS_url value, you can adjust to the desired Tanimoto threshold 
 % (i.e., 97, 90, etc.)_
 
-% set a CID limit to 100 max
+% set a CID limit to 25 max
 %% 
-% _The CID limit of 100 was added as an initial testing safety for time 
-% consideration. This limit can be increased._
+% _The CID limit of 25 was added as an initial testing safety for time consideration. 
+% This limit can be increased._
 
 number_SS_CIDs = length(SS_CIDs)
-if number_SS_CIDs > 100
-        
-        SS_CIDs = SS_CIDs(1:100)      
+if number_SS_CIDs > 25
+    SS_CIDs = SS_CIDs(1:25)  
 else
     disp('Number of SS_CIDs not changed')    
 end
@@ -59,7 +58,8 @@ end
 
 % Create an identifier/property dataset from Similarity Search results
 % Retrieve the following data from CID hit results:
-% InChI, Isomeric SMILES, MW, HBond Donor Count, HBond Acceptor Count, XLogP
+% InChI, Isomeric SMILES, MW, Heavy Atom Count, Rotable Bond Count, and
+% Charge
 
 % setup a for loop that processes each CID one-by-one
 for r = 1:length(SS_CIDs)
@@ -70,20 +70,15 @@ for r = 1:length(SS_CIDs)
     CID_InChI_url = [api 'cid/' num2str(CID) '/property/InChI/TXT'];
     CID_IsoSMI_url = [api 'cid/' num2str(CID) '/property/IsomericSMILES/TXT'];
     CID_MW_url = [api 'cid/' num2str(CID) '/property/MolecularWeight/TXT'];  
-    CID_HBond_D_url = [api 'cid/' num2str(CID) '/property/HBondDonorCount/TXT'];
-    CID_HBond_A_url = [api 'cid/' num2str(CID) '/property/HBondAcceptorCount/TXT'];
-    CID_XLogP_url = [api 'cid/' num2str(CID) '/property/XLogP/TXT'];
-    
-    
+    CID_HeavyAtomCount_url = [api 'cid/' num2str(CID) '/property/HeavyAtomCount/TXT'];
+    CID_RotatableBondCount_url = [api 'cid/' num2str(CID) '/property/RotatableBondCount/TXT'];
+    CID_Charge_url = [api 'cid/' num2str(CID) '/property/Charge/TXT'];
 %% 
-% _Additional property data can be collected by defining new api calls, 
-% for example, if you want TPSA data:_
+% _Additional property data can be collected by defining new api calls, for 
+% example, if you want TPSA data:_
 
 % CID_TPSA_url = [api 'cid/' num2str(CID) '/property/TPSA/TXT'];
-%% 
-% 
 
-       
     % retrieve identifer and property data
     try
         CID_InChI = webread(CID_InChI_url,options);      
@@ -111,25 +106,25 @@ for r = 1:length(SS_CIDs)
         pause(n)
             
     try
-        CID_HBond_D = webread(CID_HBond_D_url,options);
+        CID_HeavyAtomCount = webread(CID_HeavyAtomCount_url,options);
     catch ME
-        CID_HBond_D = 'not found'
+        CID_HeavyAtomCount = 'not found'
     end
         n = 0.5;
         pause(n)
         
     try
-        CID_HBond_A = webread(CID_HBond_A_url,options);
+        CID_RotatableBondCount = webread(CID_RotatableBondCount_url,options);
     catch ME
-        CID_HBond_A = 'not found'
+        CID_RotatableBondCount = 'not found'
     end
         n = 0.5;
         pause(n)
        
     try
-        CID_XLogP = webread(CID_XLogP_url,options);
+        CID_Charge = webread(CID_Charge_url,options);
     catch ME
-        CID_XLogP = 'not found'
+        CID_Charge = 'not found'
     end
         n = 0.5;
         pause(n)
@@ -143,9 +138,9 @@ for r = 1:length(SS_CIDs)
         SS_CIDs{r,2} = CID_InChI;
         SS_CIDs{r,3} = CID_IsoSMI;
         SS_CIDs{r,4} = CID_MW;
-        SS_CIDs{r,5} = CID_HBond_D;
-        SS_CIDs{r,6} = CID_HBond_A;
-        SS_CIDs{r,7} = CID_XLogP;
+        SS_CIDs{r,5} = CID_HeavyAtomCount;
+        SS_CIDs{r,6} = CID_RotatableBondCount;
+        SS_CIDs{r,7} = CID_Charge;
         
         % to add more data, simply index into the next column
         % SS_CIDs{r,8} = CID_TPSA;
@@ -159,9 +154,9 @@ SS_CIDs_string = strtrim(string(SS_CIDs));
 
 % convert to table
 SSq_table = array2table(SS_CIDs_string, 'VariableNames',{'CID', 'InChI','IsoSMI','MW',...
-    'HBond_D','HBond_A','XLogP'})
-% rearrange table so that Isomeric SMILES are in column 1
-SSq_table2 = SSq_table(:, {'IsoSMI' 'CID' 'InChI' 'MW' 'HBond_D' 'HBond_A' 'XLogP'})
+    'HeavyAtomCount','RotatableBondCount','Charge'})
+% rearrange table
+SSq_table2 = SSq_table(:, {'IsoSMI' 'CID' 'InChI' 'MW' 'HeavyAtomCount' 'RotatableBondCount' 'Charge'})
 % data export as tabbed text file
 % prompt user to select folder for data export
 save_folder = uigetdir;
