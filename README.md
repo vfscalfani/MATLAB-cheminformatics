@@ -16,3 +16,8 @@ Search for chemical structures in PubChem via a Fingerprint Tanimoto Similarity 
 
 4. [PubChem_SMARTS](https://vfscalfani.github.io/MATLAB-cheminformatics/live_scripts_html/PubChem_SMARTS.html):
 Search for chemical structures in PubChem via a SMARTS substructure query and compile results
+
+
+**License and Software Usage Notice**
+
+This code is licensed under the BSD-2-Clause License. It is designed to work with MathWorks MATLAB, which is proprietary software and not included under this license. Users must have a valid license for MathWorks MATLAB to run this code.
