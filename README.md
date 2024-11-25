@@ -20,4 +20,4 @@ Search for chemical structures in PubChem via a SMARTS substructure query and co
 
 **License and Software Usage Notice**
 
-This code is licensed under the BSD-2-Clause License. It is designed to work with MathWorks MATLAB, which is proprietary software and not included under this license. Users must have a valid license for MathWorks MATLAB to run this code.
+This code is licensed under the BSD-2-Clause License. It is designed to work with MathWorks MATLAB, which is proprietary software and not included under this license. Users must have a valid license for MathWorks MATLAB to run the code.
